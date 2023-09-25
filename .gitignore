@@ -334,7 +334,7 @@ pip-selfcheck.json
 
 # Local
 migrations/versions/*
-!migrations/versions/
+!migrations/versions/.gitkeep
 media/songs/*
-!media/songs/
+!media/songs/.gitkeep
 
