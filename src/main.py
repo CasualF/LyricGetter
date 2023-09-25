@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI
 from src.config import app_configs
 from src.api import api_router
 

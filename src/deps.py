@@ -36,5 +36,6 @@ async def get_current_user(token: str = Depends(reusable_oauth2)) -> Account:
 async def get_current_superuser(current_user: Account = Depends(get_current_user)) -> Account:
     is_superuser = crud.user.is_superuser(current_user)
     if not is_superuser:
-        raise HTTPException(status_code=400, detail="The user doesn't have enough privileges")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="The user doesn't have enough privileges")
     return current_user
