@@ -8,6 +8,8 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install depende
 
 ```bash
 pip install -r requirements/dev.txt
+alembic revision --autogenerate
+alembic upgrade head
 ```
 
 ## Usage
