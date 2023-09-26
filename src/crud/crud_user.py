@@ -36,16 +36,16 @@ class CRUDUser(CRUDBase[Account, UserCreate, UserUpdate]):
                                     status_code=status.HTTP_404_NOT_FOUND)
 
     async def create(self, obj_in: UserCreate) -> Any:
-        db_obj = obj_in.model_dump()
-        password = db_obj.pop('password')
+        user_data = obj_in.model_dump()
+        password = user_data.pop('password')
         hashed_password = get_password_hash(password)
-        db_obj['hashed_password'] = hashed_password
-        db_obj['activation_code'] = uuid4()
+        user_data['hashed_password'] = hashed_password
+        user_data['activation_code'] = uuid4()
         async with AppSession() as session:
-            query = insert(Account).values(**db_obj)
+            query = insert(Account).values(**user_data)
             await session.execute(query)
             await session.commit()
-        return await self.get_by_email(email=db_obj['email'])
+        return await self.get_by_email(email=user_data['email'])
 
     async def update(self, email: EmailStr, obj_in: UserUpdate | Dict[str, Any]) -> Account:
         if isinstance(obj_in, dict):
@@ -80,6 +80,13 @@ class CRUDUser(CRUDBase[Account, UserCreate, UserUpdate]):
     @staticmethod
     def is_superuser(user_obj: Account) -> bool:
         return user_obj.is_superuser
+
+    async def make_admin(self, user_id: int):
+        async with AppSession() as session:
+            query = update(Account).where(Account.id == user_id).values(is_superuser=True).returning(Account)
+            superuser = await session.execute(query)
+            await session.commit()
+            return superuser.scalars().one()
 
 
 user = CRUDUser(Account)

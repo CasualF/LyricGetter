@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     HASHING_ALGORYTHM: str
     SECRET: str
+    PERMISSION_PASS: str
 
     SERVER_HOST: AnyHttpUrl
     USERS_OPEN_REGISTRATION: bool = True

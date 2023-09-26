@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - migrate
+
+
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ubuntu
+      POSTGRES_USER: ubuntu
+      POSTGRES_PASSWORD: 1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  makemigration:
+    build: .
+    command: alembic revision
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - db
+
+  migrate:
+    build: .
+    command: alembic upgrade head
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - db
+      - makemigration
+
+volumes:
+  postgres_data:

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status, Response
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
@@ -53,6 +54,19 @@ async def user_register(user_data: UserCreate, background_tasks: BackgroundTasks
     except:
         return {"msg": "Email was not sent but account created", 'data': user}
     return response
+
+
+@router.post("/grant-admin")
+async def superuser_register(permission_pass: str,
+                             user_id: int = None,
+                             current_user: Account = Depends(get_current_user)) -> str:
+    if permission_pass != settings.PERMISSION_PASS:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='Incorrect permission password!')
+    user_id = user_id if user_id else current_user.id
+    superuser = await crud.user.make_admin(user_id)
+
+    return f"{superuser.email} is now an admin!"
 
 
 @router.post('/login', response_model=Token)
