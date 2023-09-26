@@ -4,12 +4,17 @@ LyricGetter is a pet project of mine, written using FastAPI. The idea is to uplo
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install dependencies.
+For local environment use the package manager [pip](https://pip.pypa.io/en/stable/) to install dependencies.
 
 ```bash
 pip install -r requirements/dev.txt
 alembic revision --autogenerate
 alembic upgrade head
+```
+
+For docker environment use these commands
+```bash
+sudo docker-compose up --build
 ```
 
 ## Usage

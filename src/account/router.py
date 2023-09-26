@@ -1,28 +1,30 @@
+from asyncio import sleep
 from datetime import timedelta
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status, Response
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from pydantic import EmailStr, UUID4
+from pydantic import EmailStr, UUID4, TypeAdapter
 
 from src import crud
 from src.config import settings
 from src.account.utils import send_new_account_email
-from src.account.schemas import User, UserCreate, UserUpdate, Token, UserResponse, UsersListResponse
+from src.account.schemas import User, UserCreate, UserUpdate, Token, UserResponse
 from src.account.models import Account
 from src.security import create_access_token
 from src.deps import get_current_superuser, get_current_user
 
+from fastapi_cache.decorator import cache
+
 router = APIRouter()
 
 
-@router.get('/', response_model=UsersListResponse)
+@router.get('/', response_model=list[User])
+@cache(expire=600)
 async def retrieve_users(
-        current_user:  Account = Depends(get_current_user)
-):
+        current_user:  Account = Depends(get_current_superuser)
+) -> list[User]:
     users = await crud.user.get_list()
-    response = {'users': users}
-    return response
+    return users
 
 
 @router.post("/register", status_code=201, response_model=UserResponse)
