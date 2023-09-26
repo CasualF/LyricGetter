@@ -48,6 +48,3 @@ class UserResponse(BaseModel):
     msg: str
     data: User
 
-
-class UsersListResponse(BaseModel):
-    users: list[User]
