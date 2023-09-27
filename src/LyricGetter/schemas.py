@@ -11,6 +11,7 @@ class SongBase(BaseModel):
     file_link: str
     file_size: Optional[float]
     title: str
+    cover: Optional[str]
     duration: Optional[float]
     created_at: Optional[date]
     artist_id: Optional[int]

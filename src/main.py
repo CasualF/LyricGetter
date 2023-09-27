@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.config import app_configs
+from src.config import app_configs, settings
 from src.api import api_router
 
 from fastapi_cache import FastAPICache
@@ -14,5 +14,6 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def startup():
-    redis = aioredis.from_url("redis://localhost:6379", encoding="utf8", decode_responses=True)
+    redis = aioredis.from_url(f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
+                              encoding="utf8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="cache")

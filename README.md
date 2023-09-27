@@ -14,7 +14,8 @@ alembic upgrade head
 
 For docker environment use these commands
 ```bash
-sudo docker-compose up --build
+sudo docker-compose build
+sudo docker-compose up
 ```
 
 ## Usage

@@ -13,6 +13,7 @@ class Song(Base):
     file_link = Column(String, unique=True, index=True)
     file_size = Column(Float, nullable=True)
     title = Column(String, index=True)
+    cover = Column(String, index=True, nullable=True)
     duration = Column(Float, index=True, nullable=True)
     created_at = Column(Date, default=datetime.utcnow(), index=True)
 

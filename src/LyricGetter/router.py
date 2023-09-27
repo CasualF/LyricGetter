@@ -1,14 +1,14 @@
-from typing import Optional
-
 from fastapi import APIRouter, UploadFile, HTTPException, status, Depends
 from src.LyricGetter.schemas import SongBase, ArtistSchema, ArtistInDB
 from fastapi.responses import FileResponse
 from src.account.models import Account
+from src.tasks.tasks import process_pic
 from src.deps import get_current_user
 from src.config import settings
 from src import crud
 
 import os
+from random import randint
 from pathlib import Path
 from mutagen.mp4 import MP4
 from mutagen.mp3 import MP3
@@ -39,7 +39,13 @@ async def upload_song(file: UploadFile, artist_id: int = None):
         file_content = file.file.read()
         f.write(file_content)
 
+    random_nums = [str(randint(0, 10)) for _ in range(6)]
+    title = file.filename.replace(file_ext, '')
+    img_title = title + '_' + ''.join(random_nums)
+
     duration = None
+    audio = None
+    image_path = None
 
     if file_ext == ".mp3":
         audio = MP3(file_path)
@@ -53,6 +59,13 @@ async def upload_song(file: UploadFile, artist_id: int = None):
     elif file_ext == ".wv" or file_ext == '.wav':
         audio = WavPack(file_path)
         duration = audio.info.length
+    tags = audio.tags
+    if 'covr' in tags.keys():
+        image_data = tags["covr"]
+        process_pic.delay(image_data, img_title)
+
+    media_dir = os.path.join(settings.MEDIA_DIR, 'images')
+    image_path = media_dir + '/' + img_title + '.jpg'
 
     file_size = os.path.getsize(file_path)
     file_size_kb = file_size / 1024
@@ -61,8 +74,9 @@ async def upload_song(file: UploadFile, artist_id: int = None):
     song_info = {
         "file_link": file_path,
         "file_size": file_size_mb,
-        "title": file.filename,
+        "title": title,
         "duration": duration,
+        "cover": image_path,
     }
 
     if artist_id:
