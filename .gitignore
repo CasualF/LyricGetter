@@ -336,4 +336,6 @@ migrations/versions/*
 !migrations/versions/.gitkeep
 media/songs/*
 !media/songs/.gitkeep
+media/images/*
+!media/images/.gitkeep
 

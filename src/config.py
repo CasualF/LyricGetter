@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     DB_HOST: str
     DB_PORT: int
 
+    REDIS_HOST: str
+    REDIS_PORT: str
+
     SMTP_TLS: bool = True
     SMTP_PORT: Optional[int] = None
     SMTP_HOST: Optional[str] = None
