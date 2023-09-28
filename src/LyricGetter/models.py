@@ -31,6 +31,10 @@ class Artist(Base):
     user_id = Column(Integer, ForeignKey('users.id'), index=True)
 
     songs = relationship('Song', back_populates='artist')
+    user = relationship('Account', back_populates='artist')
+
+    def __str__(self):
+        return self.nickname
 
 
 class Lyric(Base):
