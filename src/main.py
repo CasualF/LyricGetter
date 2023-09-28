@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from src.config import app_configs, settings
 from src.api import api_router
 
@@ -9,12 +10,15 @@ from redis import asyncio as aioredis
 
 from sqladmin import Admin
 from src.database import engine
-from src.admin import model_list
+from src.admin.views import model_list
+from src.admin.auth import authentication_backend
+
 
 app = FastAPI(**app_configs)
 app.include_router(api_router)
 
-admin = Admin(app, engine)
+
+admin = Admin(app, engine, authentication_backend=authentication_backend)
 for model in model_list:
     admin.add_view(model)
 
