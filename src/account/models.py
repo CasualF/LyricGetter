@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import Boolean, Column, Integer, String, UUID
-
+from sqlalchemy.orm import relationship
 from src.database import Base
 
 
@@ -15,3 +15,5 @@ class Account(Base):
     is_active = Column(Boolean, default=False)
     is_superuser = Column(Boolean, default=False)
     activation_code = Column(UUID, nullable=True)
+
+    artist = relationship('Artist', back_populates='user')
