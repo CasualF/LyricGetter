@@ -1,6 +1,6 @@
 from sqladmin import ModelView
 from src.account.models import Account
-from src.LyricGetter.models import Song, Artist
+from src.LyricGetter.models import Song, Artist, Lyric
 
 
 class UsersAdmin(ModelView, model=Account):
@@ -15,8 +15,17 @@ class UsersAdmin(ModelView, model=Account):
 
 
 class SongAdmin(ModelView, model=Song):
-    column_list = [Song.title, Song.artist]
+    column_list = ['id', 'title', 'artist']
     icon = 'fa-solid fa-music'
 
 
-model_list = [UsersAdmin, SongAdmin]
+class ArtistAdmin(ModelView, model=Artist):
+    column_list = ['id', 'nickname']
+    icon = 'fa-solid fa-microphone'
+
+
+class LyricAdmin(ModelView, model=Lyric):
+    icon = 'fa-solid fa-closed-captioning'
+
+
+model_list = [UsersAdmin, SongAdmin, ArtistAdmin, LyricAdmin]
