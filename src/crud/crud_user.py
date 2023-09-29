@@ -1,14 +1,16 @@
 from typing import Any, Dict, Optional
+from datetime import timedelta, datetime
 from pydantic import EmailStr, UUID4
 
-from src.security import get_password_hash, verify_password
+from src.security import get_password_hash, verify_password, create_refresh_token, create_access_token
 from src.crud.base import CRUDBase
-from src.account.models import Account
-from src.account.schemas import UserCreate, UserUpdate
+from src.account.models import Account, Token
+from src.account.schemas import UserCreate, UserUpdate, RefreshRequest
 from src.database import AppSession
 from uuid import uuid4
 
 from sqlalchemy import select, insert, delete, update
+from sqlalchemy.dialects.postgresql import insert as psql_insert
 from fastapi import HTTPException, status
 
 
@@ -72,6 +74,35 @@ class CRUDUser(CRUDBase[Account, UserCreate, UserUpdate]):
         if not verify_password(password, user_obj.hashed_password):
             return None
         return user_obj
+
+    async def refresh_token(self, subject: int, exp: timedelta):
+        async with AppSession() as session:
+            token = create_refresh_token(subject=subject, expires_delta=exp)
+            expires_at = datetime.utcnow() + exp
+            query = psql_insert(
+                Token
+               ).values(
+                    user_id=subject,
+                    token=token,
+                    exp_at=expires_at
+                ).on_conflict_do_update(index_elements=['user_id'],
+                                        set_=dict(exp_at=expires_at)).returning(Token)
+            refresh_token = await session.execute(query)
+            await session.commit()
+            return refresh_token.scalars().one()
+
+    async def refresh(self, refresh_data: dict):
+        async with AppSession() as session:
+            user_id: int = refresh_data['user_id']
+            query = select(Token).where(Token.user_id == user_id)
+            token_obj = await session.execute(query)
+            token_obj = token_obj.scalars().one()
+            token = token_obj.token
+            if refresh_data['refresh_token'] != token:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                                    detail='Incorrect refresh_token')
+            access_token = create_access_token(subject=user_id)
+            return access_token
 
     @staticmethod
     def is_active(user_obj: Account) -> bool:

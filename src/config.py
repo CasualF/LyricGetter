@@ -1,7 +1,7 @@
 from pydantic import EmailStr, AnyHttpUrl
 from starlette.config import Config
 from pydantic_settings import BaseSettings
-from typing import Optional
+from typing import Optional, Literal
 import os
 
 config = Config(".env")
@@ -11,11 +11,13 @@ class Settings(BaseSettings):
     title: str = 'Self learning'
     PROJECT_NAME: str
     ENVIRONMENT: str
+    MODE: Literal['DEV', 'TEST', 'PROD']
 
     BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))
     MEDIA_DIR: str = os.path.join(BASE_DIR.replace('src', ''), 'media')
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
     HASHING_ALGORYTHM: str
     SECRET: str
@@ -28,7 +30,13 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASS: str
     DB_HOST: str
-    DB_PORT: int
+    DB_PORT: str
+
+    TEST_DB_NAME: str
+    TEST_DB_USER: str
+    TEST_DB_PASS: str
+    TEST_DB_HOST: str
+    TEST_DB_PORT: str
 
     REDIS_HOST: str
     REDIS_PORT: str

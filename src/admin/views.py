@@ -1,5 +1,5 @@
 from sqladmin import ModelView
-from src.account.models import Account
+from src.account.models import Account, Token
 from src.LyricGetter.models import Song, Artist, Lyric
 
 
@@ -28,4 +28,12 @@ class LyricAdmin(ModelView, model=Lyric):
     icon = 'fa-solid fa-closed-captioning'
 
 
-model_list = [UsersAdmin, SongAdmin, ArtistAdmin, LyricAdmin]
+class TokenAdmin(ModelView, model=Token):
+    column_list = ['token', 'user']
+    icon = 'fa-solid fa-key'
+    can_delete = False
+    can_edit = False
+
+
+model_list = [UsersAdmin, SongAdmin, ArtistAdmin,
+              LyricAdmin, TokenAdmin]
