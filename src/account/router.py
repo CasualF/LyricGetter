@@ -1,14 +1,15 @@
-from asyncio import sleep
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status, Response
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from pydantic import EmailStr, UUID4, TypeAdapter
+from pydantic import EmailStr, UUID4
 
 from src import crud
 from src.config import settings
 from src.account.utils import send_new_account_email
-from src.account.schemas import User, UserCreate, UserUpdate, Token, UserResponse
+from src.account.schemas import (RefreshBase, AccessToken,
+                                 User, UserCreate, UserUpdate,
+                                 Token, UserResponse)
 from src.account.models import Account
 from src.security import create_access_token
 from src.deps import get_current_superuser, get_current_user
@@ -81,10 +82,23 @@ async def login_jwt_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(subject=user.id, expires_delta=access_token_expires)
+    refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    token_obj = await crud.user.refresh_token(subject=user.id, exp=refresh_token_expires)
+    refresh_token = token_obj.token
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
     }
+
+
+@router.post('/refresh', response_model=AccessToken)
+async def refresh(refresh_data: RefreshBase = None, current_user: Account = Depends(get_current_user)):
+    user_id = current_user.id
+    refresh_data = refresh_data.model_dump()
+    refresh_data['user_id'] = user_id
+    access_token = await crud.user.refresh(refresh_data)
+    return {'access_token': access_token}
 
 
 @router.post('/logout', response_model=str)

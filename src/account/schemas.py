@@ -37,6 +37,7 @@ class User(UserInDBBase):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 
@@ -48,3 +49,14 @@ class UserResponse(BaseModel):
     msg: str
     data: User
 
+
+class RefreshBase(BaseModel):
+    refresh_token: str
+
+
+class RefreshRequest(RefreshBase):
+    user_id: int
+
+
+class AccessToken(BaseModel):
+    access_token: str
