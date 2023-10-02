@@ -1,4 +1,6 @@
 # LyricGetter
+### UPD 
+The Idea is doomed since I realized genius doesn't provide lyrics which was the main idea
 
 LyricGetter is a pet project of mine, written using FastAPI. The idea is to upload songs and lyrics will be pulled from Genius API.
 
